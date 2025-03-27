@@ -22,9 +22,6 @@ signals:
     void recordingStopped();  // Signal emitted when recording stops
     void errorOccurred(const QString &error);  // Signal emitted when an error occurs
 
-protected:
-    void runFFmpeg();  // Run the ffmpeg process
-
 private:
     bool recording;  // Flag to track if recording is in progress
     QProcess *ffmpegProcess;  // Process to run ffmpeg
