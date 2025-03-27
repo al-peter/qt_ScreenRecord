@@ -13,7 +13,7 @@ void ScreenRecorderThread::startRecording(bool isWindowCaptureChecked)
     if (recording) return;  // Don't start a new recording if one is already in progress
 
     recording = true;
-    outputFile = "/home/orangepi/Documents/Projects/qt_ScreenRecord/recordings/" + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + "_screen.mp4";
+    outputFile = "../recordings/" + QDateTime::currentDateTime().toString("yyyy_MM_dd_hh_mm_ss") + "_screen.mp4";
 
     QStringList arguments;
 
@@ -25,7 +25,7 @@ void ScreenRecorderThread::startRecording(bool isWindowCaptureChecked)
                   << "-video_size" << "640x480"
                   << "-i" << ":0.0+640,327"
                   << "-r" << "30"
-                  << "-c:v" << "h264_v4l2m2m"
+                  << "-c:v" << "libx264"
                   << "-b:v" << "2M"
                   << "-pix_fmt" << "yuv420p"
                   << outputFile;
@@ -37,7 +37,7 @@ void ScreenRecorderThread::startRecording(bool isWindowCaptureChecked)
                   << "-video_size" << "1920x1080"
                   << "-i" << ":0.0"
                   << "-r" << "30"
-                  << "-c:v" << "h264_v4l2m2m"
+                  << "-c:v" << "libx264"
                   << "-b:v" << "2M"
                   << "-pix_fmt" << "yuv420p"
                   << outputFile;
@@ -74,7 +74,7 @@ void ScreenRecorderThread::runFFmpeg()
                   << "-video_size" << "1920x1080"
                   << "-i" << ":0.0"
                   << "-r" << "30"
-                  << "-c:v" << "h264_v4l2m2m"
+                  << "-c:v" << "libx264"
                   << "-b:v" << "2M"
                   << "-pix_fmt" << "yuv420p"
                   << outputFile;
@@ -85,7 +85,7 @@ void ScreenRecorderThread::runFFmpeg()
                   << "-video_size" << "640x480"
                   << "-i" << QString(":%0").arg(windowId)  // Specify window capture ID
                   << "-r" << "30"
-                  << "-c:v" << "h264_v4l2m2m"
+                  << "-c:v" << "libx264"
                   << "-b:v" << "2M"
                   << "-pix_fmt" << "yuv420p"
                   << outputFile;
@@ -133,17 +133,28 @@ void ScreenRecorderThread::stopRecording()
     if (!recording) return;  // Don't stop if recording isn't in progress
 
     if (ffmpegProcess) {
-        ffmpegProcess->terminate();
-        // If process doesn't terminate in time, forcefully kill it
-        if (!ffmpegProcess->waitForFinished(3000))
+        qInfo() << "Stopping recording...";
+
+        ffmpegProcess->write("q"); // q to stop
+        ffmpegProcess->closeWriteChannel();
+
+        if (!ffmpegProcess->waitForFinished(5000))
         {
-            qWarning() << "FFmpeg process did not finish in time. Forcing kill.";
-            ffmpegProcess->kill();
+            qWarning() << "FFmpeg did not close in time. Attempting terminate()...";
+            ffmpegProcess->terminate();
+
+            if (!ffmpegProcess->waitForFinished(5000))
+            {
+                qWarning() << "FFmpeg still not closing. Forcing kill()...";
+                ffmpegProcess->kill();
+            }
         }
 
+        int exitCode = ffmpegProcess->exitCode();
+        qInfo() << "FFmpeg exited with code: " << exitCode;
+
         recording = false;
-        qInfo() << "Recording stopped.";
-        emit recordingStopped();  // Emit signal to indicate recording stopped
+        emit recordingStopped();
     }
 }
 
