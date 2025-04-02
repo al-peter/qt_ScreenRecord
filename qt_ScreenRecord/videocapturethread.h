@@ -27,6 +27,7 @@ signals:
 
 private:
     cv::VideoCapture cap;  // OpenCV VideoCapture object to capture frames from the camera
+    cv::VideoWriter writer; //GStreamer pipeline writer object
     bool running;  // Flag indicating whether the thread is running
     int threadNum = 3;  // Number of threads used for processing (default value)
 
