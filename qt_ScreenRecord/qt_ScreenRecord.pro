@@ -7,11 +7,15 @@ CONFIG -= app_bundle
 INCLUDEPATH += /usr/local/include/opencv4/
 INCLUDEPATH += ~/rknn_toolkit2/include/
 INCLUDEPATH += /home/orangepi/Documents/Projects/qt_ScreenRecord/qt_ScreenRecord/include/
+INCLUDEPATH += /usr/include/gstreamer-1.0
+INCLUDEPATH += /usr/include/glib-2.0
+INCLUDEPATH += /usr/lib/aarch64-linux-gnu/glib-2.0/include
 
 LIBS += -L/usr/local/lib \
     -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_videoio \
     -lopencv_dnn -lopencv_objdetect -lopencv_imgcodecs
 LIBS += -L~/rknn_toolkit2/lib -lrknn_api
+LIBS += -lgstreamer-1.0 -lgobject-2.0 -lglib-2.0
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
